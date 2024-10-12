@@ -8,25 +8,43 @@
   <script defer src="/src/upload.js"></script>
   <script defer src="/src/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
   <style>
     #chart_div {
       width: 100%;
       height: 100%;
       overflow: auto;
     }
-    /* Apply the Poppins font to the entire body and SVG text elements */
     body {
       font-family: 'Poppins', sans-serif;
     }
     svg text {
       font-family: 'Poppins', sans-serif;
     }
+    /* Hide the actual file input */
+    #sitemapFile {
+      display: none;
+    }
+    /* Style the label to look like a button */
+    .upload-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <h1>Upload XML Sitemap to see your tree</h1>
+  <!-- Add a label for the file input -->
+  <label for="sitemapFile" class="upload-button">Choose XML File</label>
   <input type="file" id="sitemapFile" accept=".xml" />
   <div id="chart_div"></div>
+  <footer>
+  Howdy, please come see me at <a href="https://torstein.io" target="_blank">torstein.io</a></p>
+  <p>No copyright. Feel free to use and modify.</p>
+  </footer>
 </body>
 </html>
