@@ -20,7 +20,7 @@ function generateTreeFromURLs(urls) {
 // Create the root hierarchy
   const root = d3.hierarchy(data);
   const dx = 48;
-  const dy = 420; // Increase this value to spread nodes more horizontally
+  const dy = 480; // Increase this value to spread nodes more horizontally
 
 
   // Define the tree layout and the shape for links
