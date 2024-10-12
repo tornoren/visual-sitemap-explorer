@@ -3,6 +3,8 @@
  * @param {Array} urls - An array of URLs to be visualized in the tree diagram.
  */
 function generateTreeFromURLs(urls) {
+
+  d3.select("#chart_div").selectAll("*").remove();
   // Convert URLs to a hierarchical data structure
   const rootDomain = new URL(urls[0]).hostname; // Extract the root domain from the first URL
   const data = generateHierarchicalData(urls, rootDomain); // Generate hierarchical data
