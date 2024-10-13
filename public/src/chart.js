@@ -13,7 +13,7 @@ function generateTreeFromURLs(urls) {
   const marginTop = 10;
   const marginRight = 10;
   const marginBottom = 10;
-  const marginLeft = 320; // Increase left margin to provide more space for the root node
+  const marginLeft = 240; // Increase left margin to provide more space for the root node
   const width = 2400; // Define the width of the SVG
   const height = 600; // Increase the height of the SVG
 
