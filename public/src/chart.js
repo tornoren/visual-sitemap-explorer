@@ -20,7 +20,7 @@ function generateTreeFromURLs(urls) {
 // Create the root hierarchy
   const root = d3.hierarchy(data);
   const dx = 48;
-  const dy = 480; // Increase this value to spread nodes more horizontally
+  const dy = 640; // Increase this value to spread nodes more horizontally
 
 
   // Define the tree layout and the shape for links
@@ -33,7 +33,7 @@ function generateTreeFromURLs(urls) {
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [-marginLeft, -marginTop, width + marginLeft, height]) // Adjust viewBox to include more space on the left
-    .attr("style", "max-width: 100%; height: auto; font: 18px sans-serif; user-select: none;");
+    .attr("style", "max-width: none; height: auto; font: 18px sans-serif; user-select: none;");
 
   const gLink = svg.append("g")
     .attr("fill", "none")
