@@ -14,7 +14,7 @@ function generateTreeFromURLs(urls) {
   const marginRight = 10;
   const marginBottom = 10;
   const marginLeft = 240; // Increase left margin to provide more space for the root node
-  const width = 2400; // Define the width of the SVG
+  const width = 4800; // Define the width of the SVG
   const height = 600; // Increase the height of the SVG
 
 // Create the root hierarchy
@@ -44,6 +44,7 @@ function generateTreeFromURLs(urls) {
   const gNode = svg.append("g")
     .attr("cursor", "pointer")
     .attr("pointer-events", "all");
+    
 
 
   function update(event, source) {
