@@ -85,20 +85,21 @@ function generateTreeFromURLs(urls) {
         update(event, d);
       });
 
-    nodeEnter.append("circle")
-      .attr("r", 2.5)
-      .attr("fill", d => d._children ? "#555" : "#999")
-      .attr("stroke-width", 10);
-
     nodeEnter.append("text")
       .attr("dy", "0.31em")
-      .attr("x", d => d._children ? -6 : 6)
-      .attr("text-anchor", d => d._children ? "end" : "start")
-      .text(d => d.data.name)
+      .attr("x", 6)
+      .attr("text-anchor", "start")
+      .text(d => d.data.name + (d._children ? ' >' : ''))
       .attr("stroke-linejoin", "round")
       .attr("stroke-width", 3)
       .attr("stroke", "white")
       .attr("paint-order", "stroke");
+
+    nodeEnter.append("circle")
+      .attr("r", 2.5)
+      .attr("cx", -6)
+      .attr("fill", d => d._children ? "#555" : "#999")
+      .attr("stroke-width", 10);
 
     // Transition nodes to their new position
     const nodeUpdate = node.merge(nodeEnter).transition(transition)
