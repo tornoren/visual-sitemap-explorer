@@ -25,7 +25,23 @@ function generateTreeFromURLs(urls) {
 
   // Define the tree layout and the shape for links
   const tree = d3.tree().nodeSize([dx, dy]);
-  const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+  const diagonal = d3.linkHorizontal()
+    .x(d => d.y)
+    .y(d => d.x)
+    .source(d => {
+      // Use chevron position for source (parent) node
+      return {
+        x: d.source.x,
+        y: d.source.y + (d.source.chevronX || 0)
+      };
+    })
+    .target(d => {
+      // Regular position for target (child) node - connect to circle
+      return {
+        x: d.target.x,
+        y: d.target.y - 6 // Connect to the circle position
+      };
+    });
 
 
   // Create the SVG container
@@ -79,27 +95,82 @@ function generateTreeFromURLs(urls) {
     const nodeEnter = node.enter().append("g")
       .attr("transform", d => `translate(${source.y0},${source.x0})`)
       .attr("fill-opacity", 0)
-      .attr("stroke-opacity", 0)
-      .on("click", (event, d) => {
-        d.children = d.children ? null : d._children;
-        update(event, d);
-      });
+      .attr("stroke-opacity", 0);
 
-    nodeEnter.append("text")
-      .attr("dy", "0.31em")
-      .attr("x", 6)
-      .attr("text-anchor", "start")
-      .text(d => d.data.name + (d._children ? ' >' : ''))
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-width", 3)
-      .attr("stroke", "white")
-      .attr("paint-order", "stroke");
-
+    // Circle (visual indicator only)
     nodeEnter.append("circle")
       .attr("r", 2.5)
       .attr("cx", -6)
       .attr("fill", d => d._children ? "#555" : "#999")
       .attr("stroke-width", 10);
+
+    // Clickable node name text (opens URL)
+    nodeEnter.append("text")
+      .attr("class", "node-label")
+      .attr("dy", "0.31em")
+      .attr("x", 6)
+      .attr("text-anchor", "start")
+      .text(d => d.data.name)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-width", 3)
+      .attr("stroke", "white")
+      .attr("paint-order", "stroke")
+      .attr("cursor", "pointer")
+      .on("click", function(event, d) {
+        event.stopPropagation();
+        if (d.data.url) {
+          window.open(d.data.url, '_blank');
+        }
+      })
+      .on("mouseenter", function() {
+        d3.select(this).style("text-decoration", "underline");
+      })
+      .on("mouseleave", function() {
+        d3.select(this).style("text-decoration", "none");
+      });
+
+    // Add chevron element for all nodes that have or had children
+    nodeEnter.each(function(d) {
+      if (d._children || d.children) {
+        d3.select(this).append("text")
+          .attr("class", "chevron")
+          .attr("dy", "0.31em")
+          .attr("text-anchor", "start")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-width", 3)
+          .attr("stroke", "white")
+          .attr("paint-order", "stroke")
+          .attr("cursor", "pointer")
+          .attr("fill", "#555")
+          .on("click", function(event, d) {
+            event.stopPropagation();
+            d.children = d.children ? null : d._children;
+            update(event, d);
+          });
+      }
+    });
+
+    // Update chevron position and visibility for ALL nodes
+    node.merge(nodeEnter).each(function(d) {
+      const label = d3.select(this).select(".node-label");
+      const chevron = d3.select(this).select(".chevron");
+
+      if (label.node()) {
+        const bbox = label.node().getBBox();
+
+        // Update chevron position if it exists
+        if (chevron.node()) {
+          chevron
+            .attr("x", 6 + bbox.width + 5)
+            .text(d.children ? '>' : (d._children ? '>' : ''));
+        }
+
+        // Store chevron position for line connections
+        if (d._children || d.children) {
+          d.chevronX = 6 + bbox.width + 12;
+        }
+      }
+    });
 
     // Transition nodes to their new position
     const nodeUpdate = node.merge(nodeEnter).transition(transition)
@@ -161,21 +232,27 @@ function generateTreeFromURLs(urls) {
  * @returns {Object} A hierarchical data structure.
  */
 function generateHierarchicalData(urls, rootDomain) {
-  const root = { name: rootDomain, children: [] }; // Initialize the root node
-  const nodes = {}; // Object to track nodes and their children
+  const parsedFirstUrl = new URL(urls[0]);
+  const rootUrl = parsedFirstUrl.origin; // e.g., https://example.com
+  const root = { name: rootDomain, url: rootUrl, children: [] }; // Initialize the root node
+  const nodeMap = {}; // Object to track nodes by their full path
 
   urls.forEach((url) => {
     const parsedUrl = new URL(url); // Parse the URL
     const segments = parsedUrl.pathname.split('/').filter(Boolean); // Split the path into segments
 
     let currentNode = root; // Start at the root node
+    let currentPath = parsedUrl.origin; // Start with https://domain.com
+
     segments.forEach((segment) => {
-      if (!nodes[segment]) { // If the segment is not already a node, add it
-        const newNode = { name: segment, children: [] }; // Create a new node
-        nodes[segment] = newNode; // Add the node to the nodes object
+      currentPath += '/' + segment; // Build full URL incrementally
+
+      if (!nodeMap[currentPath]) { // If the path is not already tracked, add it
+        const newNode = { name: segment, url: currentPath, children: [] }; // Create a new node
+        nodeMap[currentPath] = newNode; // Track the node by its full path
         currentNode.children.push(newNode); // Add the new node as a child of the current node
       }
-      currentNode = nodes[segment]; // Move to the new node
+      currentNode = nodeMap[currentPath]; // Move to the new node
     });
   });
 
